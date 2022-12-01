@@ -1,34 +1,55 @@
+use itertools::Itertools;
+
 type Data = Vec<i32>;
 
 #[aoc_generator(day1)]
 pub fn generator(input: &str) -> Data {
-    input.lines().map(|l| l.parse::<i32>().unwrap()).collect()
+    input
+        .split("\n\n")
+        .map(|part| part
+            .lines()
+            .map(|l| l.parse::<i32>().unwrap()).sum()
+        ).collect()
 }
 
 #[aoc(day1, part1)]
-pub fn part1(inputs: &Data) -> usize {
-    0
+pub fn part1(inputs: &Data) -> i32 {
+    *inputs.into_iter().max().unwrap()
 }
 
 #[aoc(day1, part2)]
-pub fn part2(inputs: &Data) -> usize {
-    0
+pub fn part2(inputs: &Data) -> i32 {
+    inputs.iter().sorted().rev().take(3).sum()
 }
 #[cfg(test)]
 mod tests {
     //use super::*;
 
-    const _SAMPLE: [i32; 10] = [199,200,208,210,200,207,240,269,260,263];
+
+    use crate::day01::*;
+
+    const SAMPLE: &str = "1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000";
 
     #[test]
     pub fn test1() {
-        //assert_eq!(part1(&SAMPLE), 7);
-        //assert_eq!(part1_golf1(&SAMPLE), 7);
+        assert_eq!(part1(&generator(&SAMPLE)), 24000)
     }
 
     #[test]
     pub fn test2() {
-        //assert_eq!(part2(&SAMPLE), 5);
-        //assert_eq!(part2_golf1(&SAMPLE), 5);
+        assert_eq!(part2(&generator(&SAMPLE)), 45000)
     }
 }
