@@ -5,9 +5,10 @@ extern crate aoc_runner_derive;
 extern crate regex;
 extern crate statistical;
 
-pub mod day01;
-
-
 pub mod help;
+pub mod day01;
+pub mod day02;
+
+
 
 aoc_lib!{ year = 2022 }
