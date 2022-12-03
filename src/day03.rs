@@ -1,6 +1,4 @@
 use itertools::Itertools;
-use std::collections::HashMap;
-use std::ops::Add;
 
 type Data = Vec<(String, String)>;
 
@@ -35,40 +33,14 @@ pub fn part1(inputs: &Data) -> i32 {
 
 #[aoc(day3, part2)]
 pub fn part2(inputs: &Data) -> i32 {
-    let count = inputs.len() / 3;
-    (0..count)
-        .into_iter()
-        .map(|n| {
-            priority(
-                *inputs
-                    .iter()
-                    .skip(n * 3)
-                    .take(3)
-                    .enumerate()
-                    .fold(
-                        HashMap::<char, (usize, usize, usize)>::new(),
-                        |mut acc, (i, (a, b))| {
-                            let mut joined = a.to_string();
-                            joined.push_str(b);
-                            joined.chars().into_iter().fold(acc, |mut acc, c| {
-                                let cnt = acc.entry(c).or_insert((0, 0, 0));
-                                match i {
-                                    0 => cnt.0 += 1,
-                                    1 => cnt.1 += 1,
-                                    2 => cnt.2 += 1,
-                                    _ => unreachable!(),
-                                }
-                                acc
-                            })
-                        },
-                    )
-                    .iter()
-                    .find(|(_, &(a, b, c))| a >= 1 && b >= 1 && c >= 1)
-                    .unwrap()
-                    .0,
-            )
-        })
-        .sum()
+    inputs.iter().tuples::<(_, _, _)>().map(|(a, b, c)| {
+        let mut joined = a.0.to_string();
+        joined.push_str(a.1.as_str());
+        priority(joined.chars().into_iter().find(|x|
+            (b.0.contains(*x) || b.1.contains(*x)) &&
+            (c.0.contains(*x) || c.1.contains(*x))
+        ).unwrap())
+    }).sum()
 }
 
 #[cfg(test)]
