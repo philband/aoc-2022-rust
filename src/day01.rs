@@ -14,7 +14,7 @@ pub fn generator(input: &str) -> Data {
 
 #[aoc(day1, part1)]
 pub fn part1(inputs: &Data) -> i32 {
-    *inputs.into_iter().max().unwrap()
+    *inputs.iter().max().unwrap()
 }
 
 #[aoc(day1, part2)]
@@ -23,10 +23,7 @@ pub fn part2(inputs: &Data) -> i32 {
 }
 #[cfg(test)]
 mod tests {
-    //use super::*;
-
-
-    use crate::day01::*;
+    use super::*;
 
     const SAMPLE: &str = "1000
 2000

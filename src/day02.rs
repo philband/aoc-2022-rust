@@ -72,10 +72,7 @@ pub fn part2(inputs: &Data) -> i32 {
 }
 #[cfg(test)]
 mod tests {
-    //use super::*;
-
-
-    use crate::day02::*;
+    use super::*;
 
     const SAMPLE: &str = "A Y
 B X
