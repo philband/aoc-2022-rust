@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 type Data = Vec<(char, char)>;
 
 #[aoc_generator(day2)]
