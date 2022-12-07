@@ -75,11 +75,11 @@ mod tests {
 
     #[test]
     pub fn test1() {
-        assert_eq!(part1(&generator(&SAMPLE)), 0)
+        assert_eq!(part1(&generator(&SAMPLE)), "")
     }
 
     #[test]
     pub fn test2() {
-        assert_eq!(part2(&generator(&SAMPLE)), 0)
+        assert_eq!(part2(&generator(&SAMPLE)), "")
     }
 }
