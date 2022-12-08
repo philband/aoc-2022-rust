@@ -1,5 +1,4 @@
 use core::cell::Cell;
-use std::io::Read;
 
 struct Node {
     name: Vec<u8>,

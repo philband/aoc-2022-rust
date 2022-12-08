@@ -21,3 +21,4 @@ hex = "0"
 scan_fmt = "0"
 glam = "0"
 range-ext = "0"
+aoc = {path = "aoc" }
