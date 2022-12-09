@@ -13,10 +13,10 @@ pub fn generator(input: &str) -> Data {
         .map(|l| {
             let parts = l.split_whitespace().collect::<Vec<_>>();
             let d = match parts[0].chars().nth(0).unwrap() {
-                'R' => aoc::RIGHT,
-                'L' => aoc::LEFT,
-                'U' => aoc::UP,
-                'D' => aoc::DOWN,
+                'R' => RIGHT,
+                'L' => LEFT,
+                'U' => UP,
+                'D' => DOWN,
                 _ => unreachable!()
             };
             (d, parts[1].parse().unwrap())
@@ -37,7 +37,7 @@ pub fn part2(inputs: &Data) -> usize {
 
 pub fn run(inputs: &Data, tail_len: usize) -> usize {
     let mut positions: Vec<Point> = vec![[0,0]; tail_len+1];
-    let visited = HashSet::<Point>::new();
+    let visited: HashSet<Point> = HashSet::new();
 
     inputs.into_iter().fold(visited, |visited, &(direction, distance)| {
         (0..distance).into_iter().fold(visited, |mut visited, _| {
