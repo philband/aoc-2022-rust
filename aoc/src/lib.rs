@@ -79,6 +79,10 @@ pub fn hex_neighbors(p: Vec3) -> impl Iterator<Item = Vec3> {
     from_fn(move || diter.next().map(|d| vec_add(p, *d)))
 }
 
+pub fn point_signum(p: Point) -> Point {
+    [p[0].signum(), p[1].signum()]
+}
+
 pub fn parse_grid_to<'a, I, J, T>(lines: I, f: fn(char) -> T) -> Vec<Vec<T>>
     where
         I: IntoIterator<Item = &'a J>,

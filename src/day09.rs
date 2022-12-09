@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use itertools::Itertools;
-use aoc::{neighbors, neighbors_incl_diagonals, Point, point_add};
+use aoc::*;
 
 type Data = Vec<(Point, i32)>;
 
@@ -36,47 +36,31 @@ pub fn part2(inputs: &Data) -> usize {
 }
 
 pub fn run(inputs: &Data, tail_len: usize) -> usize {
-    let mut head: Point = [0,0];
-    let mut tails: Vec<Point> = vec![[0,0]; tail_len];
-    let tail_count = tails.len();
+    let mut positions: Vec<Point> = vec![[0,0]; tail_len+1];
     let visited = HashSet::<Point>::new();
-
 
     inputs.into_iter().fold(visited, |visited, &(direction, distance)| {
         (0..distance).into_iter().fold(visited, |mut visited, _| {
-            head = point_add(head, direction);
-            (0..tail_len).into_iter().for_each(|i| {
-                let current_head = if i == 0 {
-                    head
-                } else {
-                    tails[i-1]
-                };
-                let current_tail = &mut tails[i];
+            positions[0] = point_add(positions[0], direction);
+            (1..=tail_len).into_iter().for_each(|i| {
+                let current_head = positions[i-1];
+                let current_tail = &mut positions[i];
 
                 if !neighbors_incl_diagonals(current_head).contains(current_tail) && !current_head.eq(current_tail) {
-                    if i == tail_count-1 {
+                    if i == tail_len {
                         visited.insert(*current_tail);
                     }
-                    if let Some(ht) = neighbors(*current_tail).find(|ht| neighbors(current_head).any(|hn| hn.eq(ht))) {
-                        *current_tail = ht;
-                    } else if let Some(ht) = neighbors_incl_diagonals(*current_tail).find(|ht| neighbors(current_head).any(|hn| hn.eq(ht))) {
-                        *current_tail = ht;
-                    } else if let Some(ht) = neighbors_incl_diagonals(*current_tail).find(|ht| neighbors_incl_diagonals(current_head).any(|hn| hn.eq(ht))) {
-                        *current_tail = ht;
-                    }
+                    *current_tail = point_add(*current_tail, point_signum(point_sub(current_head, *current_tail)));
                 }
             });
 
             if DEBUG {
                 for y in -15..=6 {
                     for x in -11..=15 {
-                        if [x, y] == head {
-                            print!("H");
-                        } else {
-                            match (0..tail_len-1).position(|i| tails[i] == [x, y]) {
-                                Some(i) => print!("{}", i+1),
-                                _ => print!(".")
-                            }
+                        match (0..tail_len-1).position(|i| positions[i] == [x, y]) {
+                            Some(0) => print!("H"),
+                            Some(i) => print!("{}", i+1),
+                            _ => print!(".")
                         }
                     }
                     println!()
@@ -84,8 +68,8 @@ pub fn run(inputs: &Data, tail_len: usize) -> usize {
                 println!();
             }
 
-            if tails[tail_len-1] != [0,0] {
-                visited.insert(tails[tail_len-1]);
+            if positions[tail_len] != [0,0] {
+                visited.insert(positions[tail_len]);
             }
             visited
         })
