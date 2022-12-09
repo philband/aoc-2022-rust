@@ -43,7 +43,7 @@ pub fn run(inputs: &Data, tail_len: usize) -> usize {
 
 
     inputs.into_iter().fold(visited, |visited, &(direction, distance)| {
-        let ret = (0..distance).into_iter().fold(visited, |mut visited, _| {
+        (0..distance).into_iter().fold(visited, |mut visited, _| {
             head = point_add(head, direction);
             (0..tail_len).into_iter().for_each(|i| {
                 let current_head = if i == 0 {
@@ -88,9 +88,7 @@ pub fn run(inputs: &Data, tail_len: usize) -> usize {
                 visited.insert(tails[tail_len-1]);
             }
             visited
-        });
-
-        ret
+        })
     }).len()
 }
 
