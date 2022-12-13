@@ -99,6 +99,7 @@ dependencies = [
  "regex",
  "scan_fmt",
  "statistical",
+ "thiserror",
 ]
 
 [[package]]

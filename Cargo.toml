@@ -22,3 +22,4 @@ scan_fmt = "0"
 glam = "0"
 range-ext = "0"
 aoc = {path = "aoc" }
+thiserror = "1.0.37"

@@ -1,6 +1,9 @@
 extern crate vecmath;
 
 use std::iter::from_fn;
+use std::collections::{HashMap, BTreeMap, HashSet, BinaryHeap, VecDeque};
+use std::cmp::Reverse;
+use std::thread::current;
 
 pub type Point = self::vecmath::Vector2<i64>;
 pub type FPoint = self::vecmath::Vector2<f64>;
@@ -83,6 +86,17 @@ pub fn point_signum(p: Point) -> Point {
     [p[0].signum(), p[1].signum()]
 }
 
+pub fn parse_grid<'a, I, J>(lines: I) -> Vec<Vec<char>>
+    where
+        I: IntoIterator<Item = &'a J>,
+        J: AsRef<str> + 'a,
+{
+    lines
+        .into_iter()
+        .map(|x| AsRef::as_ref(x).chars().collect())
+        .collect()
+}
+
 pub fn parse_grid_to<'a, I, J, T>(lines: I, f: fn(char) -> T) -> Vec<Vec<T>>
     where
         I: IntoIterator<Item = &'a J>,
@@ -92,6 +106,22 @@ pub fn parse_grid_to<'a, I, J, T>(lines: I, f: fn(char) -> T) -> Vec<Vec<T>>
         .into_iter()
         .map(|x| AsRef::as_ref(x).chars().map(f).collect())
         .collect()
+}
+
+pub fn parse_grid_to_sparse<'a, I, J, T>(lines: I, f: fn(char) -> Option<T>) -> HashMap<Point, T>
+    where
+        I: IntoIterator<Item = &'a J>,
+        J: AsRef<str> + 'a,
+{
+    let mut grid = HashMap::new();
+    for (y, line) in lines.into_iter().enumerate() {
+        for (x, c) in AsRef::as_ref(line).chars().enumerate() {
+            if let Some(t) = f(c) {
+                grid.insert([x as i64, y as i64], t);
+            }
+        }
+    }
+    grid
 }
 
 pub struct GridIteratorHelper {
@@ -148,6 +178,113 @@ pub trait Grid<T>
     fn rotate_270_cw(&mut self) {
         self.transpose();
         self.flip_vertical();
+    }
+}
+
+
+impl<S: ::std::hash::BuildHasher, T> Grid<T> for HashMap<Point, T, S>
+    where
+        T: Clone + Copy + Default + PartialEq,
+{
+    fn get_value(&self, pos: Point) -> Option<T> {
+        self.get(&pos).copied()
+    }
+    fn set_value(&mut self, pos: Point, value: T) {
+        *self.entry(pos).or_insert(value) = value;
+    }
+    fn extents(&self) -> (Point, Point) {
+        let min_x = self.iter().map(|(p, _v)| p[0]).min().unwrap_or(0);
+        let min_y = self.iter().map(|(p, _v)| p[1]).min().unwrap_or(0);
+        let max_x = self.iter().map(|(p, _v)| p[0]).max().unwrap_or(0);
+        let max_y = self.iter().map(|(p, _v)| p[1]).max().unwrap_or(0);
+        ([min_x, min_y], [max_x, max_y])
+    }
+    fn flip_horizontal(&mut self) {
+        let ([min_x, _min_y], [max_x, _max_y]) = self.extents();
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            let new_x = max_x - (x - min_x);
+            new_grid.insert([new_x, *y], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
+    }
+    fn flip_vertical(&mut self) {
+        let ([_min_x, min_y], [_max_x, max_y]) = self.extents();
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            let new_y = max_y - (y - min_y);
+            new_grid.insert([*x, new_y], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
+    }
+    fn transpose(&mut self) {
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            new_grid.insert([*y, *x], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
+    }
+}
+
+impl<T> Grid<T> for BTreeMap<Point, T>
+    where
+        T: Clone + Copy + Default + PartialEq,
+{
+    fn get_value(&self, pos: Point) -> Option<T> {
+        self.get(&pos).copied()
+    }
+    fn set_value(&mut self, pos: Point, value: T) {
+        *self.entry(pos).or_insert(value) = value;
+    }
+    fn extents(&self) -> (Point, Point) {
+        let min_x = self.iter().map(|(p, _v)| p[0]).min().unwrap_or(0);
+        let min_y = self.iter().map(|(p, _v)| p[1]).min().unwrap_or(0);
+        let max_x = self.iter().map(|(p, _v)| p[0]).max().unwrap_or(0);
+        let max_y = self.iter().map(|(p, _v)| p[1]).max().unwrap_or(0);
+        ([min_x, min_y], [max_x, max_y])
+    }
+    fn flip_horizontal(&mut self) {
+        let ([min_x, _min_y], [max_x, _max_y]) = self.extents();
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            let new_x = max_x - (x - min_x);
+            new_grid.insert([new_x, *y], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
+    }
+    fn flip_vertical(&mut self) {
+        let ([_min_x, min_y], [_max_x, max_y]) = self.extents();
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            let new_y = max_y - (y - min_y);
+            new_grid.insert([*x, new_y], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
+    }
+    fn transpose(&mut self) {
+        let mut new_grid = HashMap::new();
+        for ([x, y], v) in self.iter() {
+            new_grid.insert([*y, *x], *v);
+        }
+        self.clear();
+        for (k, v) in new_grid {
+            self.insert(k, v);
+        }
     }
 }
 
@@ -229,4 +366,162 @@ impl<T> Grid<T> for Vec<Vec<T>>
         }
         *self = new_vec;
     }
+}
+
+pub fn manhattan(n: Point, goal: Point) -> i64 {
+    (goal[0] - n[0]).abs() + (goal[1] - n[1]).abs()
+}
+
+pub fn manhattan_vec3(n: Vec3, goal: Vec3) -> i64 {
+    (goal[0] - n[0]).abs() + (goal[1] - n[1]).abs() + (goal[2] - n[2]).abs()
+}
+
+pub fn manhattan_vec4(n: Vec4, goal: Vec4) -> i64 {
+    (goal[0] - n[0]).abs()
+        + (goal[1] - n[1]).abs()
+        + (goal[2] - n[2]).abs()
+        + (goal[3] - n[3]).abs()
+}
+
+pub fn manhattan_hex_cube(n: Vec3, goal: Vec3) -> i64 {
+    ((goal[0] - n[0]).abs() + (goal[1] - n[1]).abs() + (goal[2] - n[2]).abs()) / 2
+}
+
+pub fn astar_grid<T>(
+    grid: &dyn Grid<T>,
+    is_node: fn(&Point, &T) -> bool,
+    get_edge_cost: fn(&Point, &T, &Point, &T) -> Option<i64>,
+    start: Point,
+    goal: Point,
+) -> Option<(i64, Vec<Point>)>
+    where
+        T: PartialEq + Copy,
+{
+    let mut frontier = BinaryHeap::new();
+    let mut came_from = HashMap::new();
+    let mut gscore = HashMap::new();
+    let mut fscore = HashMap::new();
+    gscore.insert(start, 0);
+    fscore.insert(start, manhattan(start, goal));
+    frontier.push(Reverse((manhattan(start, goal), start)));
+    while let Some(Reverse((_est, current))) = frontier.pop() {
+        if current == goal {
+            let mut path = vec![goal];
+            let mut curr = goal;
+            while curr != start {
+                curr = came_from[&curr];
+                path.push(curr)
+            }
+            return Some((gscore.get_value(goal).unwrap(), path));
+        }
+        let g = *gscore.entry(current).or_insert(i64::MAX);
+        let curr_val = grid.get_value(current).unwrap();
+        for nb in neighbors(current) {
+            if let Some(value) = grid.get_value(nb) {
+                if is_node(&nb, &value) {
+                    if let Some(edge_cost) = get_edge_cost(&current, &curr_val, &nb, &value) {
+                        let new_g = g + edge_cost;
+                        let nb_g = gscore.entry(nb).or_insert(i64::MAX);
+                        if new_g < *nb_g {
+                            came_from.insert(nb, current);
+                            *nb_g = new_g;
+                            let new_f = new_g + manhattan(goal, nb);
+                            *fscore.entry(nb).or_insert(i64::MAX) = new_f;
+                            frontier.push(Reverse((new_f, nb)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+
+pub fn dijkstra_grid<T>(
+    grid: &dyn Grid<T>,
+    is_node: fn(&Point, &T) -> bool,
+    get_edge_cost: fn(&Point, &T, &Point, &T) -> Option<i64>,
+    start: Point,
+    goal: Point,
+) -> Option<(i64, Vec<Point>)>
+    where
+        T: PartialEq + Copy,
+{
+    let mut frontier = BinaryHeap::new();
+    let mut visited: HashSet<Point> = HashSet::new();
+    let mut came_from = HashMap::new();
+    frontier.push(Reverse((0, start)));
+    while let Some(Reverse((score, current))) = frontier.pop() {
+        if visited.contains(&current) {
+            continue;
+        }
+        if current == goal {
+            let mut path = vec![goal];
+            let mut curr = goal;
+            while curr != start {
+                curr = came_from[&curr];
+                path.push(curr)
+            }
+            return Some((score, path.into_iter().rev().collect()));
+        }
+        let curr_val = grid.get_value(current).unwrap();
+        for nb in neighbors(current) {
+            if visited.contains(&nb) {
+                continue;
+            }
+            if let Some(value) = grid.get_value(nb) {
+                if is_node(&nb, &value) {
+                    if let Some(edge_cost) = get_edge_cost(&current, &curr_val, &nb, &value) {
+                        let new_score = score + edge_cost;
+                        came_from.insert(nb, current);
+                        frontier.push(Reverse((new_score, nb)));
+                    }
+                }
+            }
+        }
+        visited.insert(current);
+    }
+    None
+}
+
+pub fn bfs_grid<T>(
+    grid: &dyn Grid<T>,
+    is_valid_move: fn(&Point, &T, &Point, &T) -> bool,
+    start: Point,
+    goal: Point,
+) -> Option<Vec<Point>>
+    where
+        T: PartialEq + Copy,
+{
+    let mut q = VecDeque::<Point>::new();
+    let mut visited: HashSet<Point> = HashSet::new();
+    let mut came_from = HashMap::new();
+    visited.insert(start);
+    q.push_back(start);
+    while let Some(current) = q.pop_front() {
+        if current == goal {
+            let mut path = vec![goal];
+            let mut curr = came_from[&current];
+            while curr != start {
+                curr = came_from[&curr];
+                path.push(curr);
+            }
+            return Some(path.into_iter().rev().collect())
+        }
+        let current_val = grid.get_value(current).unwrap();
+        for next in neighbors(current) {
+            if visited.contains(&next) {
+                continue;
+            }
+            if let Some(next_val) = grid.get_value(next) {
+                if is_valid_move(&current, &current_val, &next, &next_val) {
+                    visited.insert(next);
+                    came_from.insert(next, current);
+                    q.push_back(next);
+                }
+            }
+        }
+    }
+    None
 }
