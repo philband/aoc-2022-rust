@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 vecmath = "1.0.0"
+parse-display = "0.6"
