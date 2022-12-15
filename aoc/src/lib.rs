@@ -372,6 +372,23 @@ pub fn manhattan(n: Point, goal: Point) -> i64 {
     (goal[0] - n[0]).abs() + (goal[1] - n[1]).abs()
 }
 
+pub fn manhattan_circumference_plus(p: &Point, manhattan: i64, add: i64) -> Vec<Point> {
+    ((p[1] - manhattan - add)..=(p[1] + manhattan + add)).into_iter().fold(Vec::<Point>::new(), |mut acc, y| {
+        let rest = manhattan - (p[1] - y).abs() + add;
+        acc.push([p[0] - rest, y]);
+        acc.push([p[0] + rest, y]);
+        acc
+    })
+}
+
+pub fn manhattan_circumference_contains_y(p: &Point, manhattan: i64, y: i64) -> Vec<Point> {
+    let rest = manhattan - (p[1] - y).abs();
+    ((p[0] - rest ) ..= (p[0] + rest)).into_iter().fold(Vec::<Point>::new(), |mut acc, x| {
+        acc.push([x, y]);
+        acc
+    })
+}
+
 pub fn manhattan_vec3(n: Vec3, goal: Vec3) -> i64 {
     (goal[0] - n[0]).abs() + (goal[1] - n[1]).abs() + (goal[2] - n[2]).abs()
 }
