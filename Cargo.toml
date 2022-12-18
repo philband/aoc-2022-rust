@@ -23,3 +23,5 @@ glam = "0"
 range-ext = "0"
 aoc = {path = "aoc" }
 thiserror = "1.0.37"
+sscanf = "0.4.0"
+ndarray = "0.15.6"
