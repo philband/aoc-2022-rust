@@ -3,7 +3,6 @@ extern crate vecmath;
 use std::iter::from_fn;
 use std::collections::{HashMap, BTreeMap, HashSet, BinaryHeap, VecDeque};
 use std::cmp::Reverse;
-use std::thread::current;
 
 pub type Point = self::vecmath::Vector2<i64>;
 pub type FPoint = self::vecmath::Vector2<f64>;
@@ -28,21 +27,21 @@ pub use self::vecmath::vec3_cross as vec_cross;
 pub use self::vecmath::vec3_dot as vec_dot;
 pub use self::vecmath::vec3_neg as vec_neg;
 
-pub const NORTH: Point = [0, -1];
+pub const NORTH: Point = [0, 1];
 pub const UP: Point = NORTH;
-pub const NORTH_EAST: Point = [1, -1];
+pub const NORTH_EAST: Point = [1, 1];
 pub const UP_RIGHT: Point = NORTH_EAST;
 pub const EAST: Point = [1, 0];
 pub const RIGHT: Point = EAST;
-pub const SOUTH_EAST: Point = [1, 1];
+pub const SOUTH_EAST: Point = [1, -1];
 pub const DOWN_RIGHT: Point = SOUTH_EAST;
-pub const SOUTH: Point = [0, 1];
+pub const SOUTH: Point = [0, -1];
 pub const DOWN: Point = SOUTH;
-pub const SOUTH_WEST: Point = [-1, 1];
+pub const SOUTH_WEST: Point = [-1, -1];
 pub const DOWN_LEFT: Point = SOUTH_WEST;
 pub const WEST: Point = [-1, 0];
 pub const LEFT: Point = WEST;
-pub const NORTH_WEST: Point = [-1, -1];
+pub const NORTH_WEST: Point = [-1, 1];
 pub const UP_LEFT: Point = NORTH_WEST;
 
 // Hex directions
